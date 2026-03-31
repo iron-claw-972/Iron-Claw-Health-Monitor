@@ -1,0 +1,51 @@
+# IronClaw Robot Health Monitor - Overview & Deployment Guide
+
+## 1. Code Architecture
+The application is a high-performance telemetry analyzer built for FIRST Robotics (FRC).
+
+### Backend (Python/FastAPI)
+- log_parser.py: Uses wpiutil to parse binary .wpilog files. Features automatic decimation (downsampling) to limit data points to 5,000 per channel for UI performance.
+- main.py: REST API handling file uploads and metadata. Implements Persistent Disk Caching (JSON) to make subsequent loads of large logs instantaneous.
+- robot_telemetry.db: SQLite database storing metadata for logs and channels.
+
+### Frontend (React/TypeScript/MUI)
+- Health Indicators Dashboard: High-performance, memoized LED grid showing system status at a glance.
+- Plots Dashboard: Optimized Chart.js implementation with Dual Y-Axes for comparing different data scales (e.g., Voltage vs. Velocity).
+- Global Cache: Prevents re-fetching data when navigating between views.
+
+## 2. GitHub Upload Instructions
+When uploading to GitHub, create a .gitignore in the root to exclude temporary and environment-specific files:
+
+### .gitignore content:
+node_modules/
+backend/venv/
+__pycache__/
+backend/uploads/*.wpilog
+backend/uploads/*.json
+backend/robot_telemetry.db
+frontend/dist/
+
+### Files/Folders to include:
+- backend/app/ (All .py files)
+- backend/requirements.txt
+- frontend/src/ (All components and services)
+- frontend/package.json
+- frontend/tsconfig.json
+- frontend/vite.config.ts
+- package.json (Root)
+- README.md
+
+## 3. Packaging & Sharing
+### Developer Share
+Zip the repository (excluding node_modules and venv). The recipient needs Python and Node.js installed.
+
+### Desktop Executable (Recommended for Teams)
+1. Build Frontend: `cd frontend; npm run build`
+2. Package Backend: `pyinstaller --onefile backend/app/main.py`
+3. Bundle: Use Electron or a simple script to launch both the executable and serve the `dist` folder.
+
+## 4. New Machine Setup
+1. Copy the code.
+2. Backend: `cd backend; python -m venv venv; .\venv\Scripts\activate; pip install -r requirements.txt`
+3. Frontend: `cd frontend; npm install; npm run build`
+4. Run: Start backend via uvicorn and serve the frontend.
